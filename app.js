@@ -3,16 +3,19 @@ var querystring = require('querystring');
 var request = require('request');
 var sprintf = require('sprintf').sprintf;
 var OAuth2 = require('oauth').OAuth2;
+//var cr = require('connect-redis');
 
 var apiBaseUrl = process.argv[5] || 'https://api.singly.com';
 
 // The port that this express app will listen on
-var port = 8043;
-var hostBaseUrl = process.argv[4] || 'http://localhost:' + port;
+var port = 3444;
+var hostBaseUrl = process.argv[4] || 'http://74.207.246.247:' + port;
 
 // Your client ID and secret from http://dev.singly.com/apps
 var clientId = process.argv[2] || '';
 var clientSecret = process.argv[3] || '';
+
+console.log(clientId)
 
 // Pick a secret to secure your session storage
 var sessionSecret = '42';
@@ -25,6 +28,8 @@ var usedServices = [
    'Twitter',
    'LinkedIn',
    'FitBit',
+   'github',
+   'gcontacts',
    'Email'
 ];
 
@@ -64,7 +69,6 @@ var app = express.createServer();
 
 // Setup for the express web framework
 app.configure(function() {
-   app.use(express.logger());
    app.use(express.static(__dirname + '/public'));
    app.use(express.bodyParser());
    app.use(express.cookieParser());
@@ -93,7 +97,7 @@ app.set('view engine', 'ejs');
 app.get('/', function(req, res) {
    var i;
    var services = [];
-
+	console.log(req.session)
    // For each service in usedServices, get a link to authorize it
    for (i = 0; i < usedServices.length; i++) {
       services.push({
