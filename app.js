@@ -3,13 +3,16 @@ var querystring = require('querystring');
 var request = require('request');
 var sprintf = require('sprintf').sprintf;
 var OAuth2 = require('oauth').OAuth2;
-//var cr = require('connect-redis');
-
+var cr = require('connect-redis');
+var RedisStore = require('connect-redis')(express);
+var Contacts = require('./contacts.js'); 
+var fs = require('fs');
 var apiBaseUrl = process.argv[5] || 'https://api.singly.com';
+var _ = require('underscore');
 
 // The port that this express app will listen on
 var port = 3444;
-var hostBaseUrl = process.argv[4] || 'http://74.207.246.247:' + port;
+var hostBaseUrl = 'http://localhost' || 'http://74.207.246.247:' + port;
 
 // Your client ID and secret from http://dev.singly.com/apps
 var clientId = process.argv[2] || '';
@@ -31,6 +34,15 @@ var usedServices = [
    'github',
    'gcontacts',
    'Email'
+];
+
+var sCon = [
+	'facebook/friends',
+	'twitter/friends',
+	'gcontacts/contacts',
+	'github/following',
+	'linkedin/connections',
+	'tumblr/following'
 ];
 
 var oa = new OAuth2(clientId, clientSecret, apiBaseUrl);
@@ -72,10 +84,9 @@ app.configure(function() {
    app.use(express.static(__dirname + '/public'));
    app.use(express.bodyParser());
    app.use(express.cookieParser());
-   app.use(express.session({
-      secret: sessionSecret
-   }));
+   app.use(express.session({ store: new RedisStore, secret: 'keyboard cat' }));
    app.use(app.router);
+   app.use(require('stylus').middleware({ src: __dirname + '/public' }));
 });
 
 // We want exceptions and stracktraces in development
@@ -91,13 +102,52 @@ app.configure('production', function() {
    app.use(express.errorHandler());
 });
 
-// Use ejs instead of jade because HTML is easy
-app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+
+app.get('/update', function(req, res){
+	if(!req.session.profiles) res.redirect('/');
+	
+	var str = {
+		access_token : req.session.access_token,
+		limit : 500,
+		map: true
+	};
+
+	var n = 0;
+	var getContacts = function(e){
+		
+		var r = request.get({
+			uri: apiBaseUrl + '/services/' + e + '?' + querystring.stringify(str)
+		}, function(er, r, b){
+			try{
+				data = JSON.parse(b);			
+				data.forEach(function(c){
+					var contact = new Contacts.CreateContact(c, e.slice(0, e.indexOf('/')), function(e, x){fs.writeFileSync('contacts/' + x._id, JSON.stringify(x), 'utf8')});
+				})
+			}
+			catch(err){
+				console.log(err)
+			}
+		});
+
+		r.on('end', function(){
+			if(++n < sCon.length){
+				getContacts(sCon[n])			
+			}
+			else res.redirect('/people');
+		});
+	}
+	
+	getContacts(sCon[n]);
+					
+});
 
 app.get('/', function(req, res) {
+
    var i;
    var services = [];
-	console.log(req.session)
+
    // For each service in usedServices, get a link to authorize it
    for (i = 0; i < usedServices.length; i++) {
       services.push({
@@ -148,7 +198,42 @@ app.get('/callback', function(req, res) {
       });
    });
 });
+app.get('/people', function(req, res){
+	var people = _.map(Contacts.ContactsDB, function(e,i){
+		return {name: e.name, id: e._id}
+	})
+	res.render('people', {people: people})
+});
 
+app.get('/person/:id', function(req, res){
+	var person = Contacts.ContactsDB[req.params.id];
+	if (!person){res.redirect('/people')}
+	else
+		res.render('person', {person: person});
+});
+app.post('/profile', function(req, res){
+	Contacts.update(req.body);
+//	console.log(Contacts.ContactsDB[req.body.id]);
+	res.writeHead('201');
+	res.end();
+});
+
+app.get('/contactsDB', function(req, res){
+	res.setHeader('Content-Type', 'application/json');
+	res.write(JSON.stringify(Contacts.ContactsDB));
+	res.end();
+})
+
+app.get('/todo', function(req, res){
+	res.render('todo')
+})
+app.get('/hide/:id', function(req, res){
+	Contacts.hide(req.params.id);
+	res.redirect('/people')
+})
 app.listen(port);
+
+console.log(Object.keys(Contacts.ContactsDB).length)
+
 
 console.log(sprintf('Listening at %s using API endpoint %s.', hostBaseUrl, apiBaseUrl));

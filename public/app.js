@@ -1,3 +1,5 @@
+/*
+
 // The URL of the Singly API endpoint
 var apiBaseUrl = 'https://api.singly.com';
 
@@ -34,9 +36,11 @@ $(function() {
    });
 
    // Get the 5 latest items from the user's Twitter feed
-   singly.get('/services/twitter/timeline', { limit: 5 }, function(tweets) {
+   singly.get('/services/google/contacts', { limit: 100 }, function(tweets) {
+			console.log(tweets)
       _.each(tweets, function(tweet) {
-         $('#twitter').append(sprintf('<li><strong>Tweet:</strong> %s</li>', tweet.data.text));
+         $('#twitter').append(sprintf('<li><strong>Person:</strong> %s<br /><strong>Email:</strong> </li>', tweet.data.title.$t));
       });
    });
 });
+*/

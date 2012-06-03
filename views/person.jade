@@ -1,0 +1,36 @@
+a(href="/people", class='homelink') INDEX
+div(class='person', id=person._id)
+	div.pic
+		img(src= person.pic || person.thumb, class='thumb')
+	div.information
+		h1.name#name
+			=person.name
+		a(href='/hide/' + person._id, style='margin:1ex 0', id='hidecontact') HIDE CONTACT
+		br
+		br
+		div.industry#industry
+			h3 Industries:
+			p.entry=person.industry
+		div.location#location
+			h3 Location:
+			p.entry=person.location
+		div.phone#phone
+			h3 Phone:
+			p.entry=person.phone
+		div.email#email
+			h3 Email:
+			p.entry=person.email
+		div.description#description
+			h3 Description:
+			p.entry=person.description
+		div.websites#websites
+			h3 Websites:
+			p.entry= person.websites
+		div.networks#networks
+			h3 Networks
+			ul
+				- each n in person.networks
+					li.network
+						a(href=n.profile, target='_blank') 
+							h4=n.name
+					

@@ -1,0 +1,29 @@
+div.sidebar
+	div
+		h3 
+			a(href='/', id='') My Networks
+		br
+	div
+		h3 
+			a(href='/update', id='') Update
+		br
+	div
+		h3 
+			a(href='#', id='showall') Show All
+		br
+	div
+		h3.dropdown Locations
+		ul.locs
+	div
+		h3.dropdown Industrii
+		ul.indii
+	div
+		h3 
+			a(href='/todo') To Do
+		
+
+ul#people.people
+	- each p in people
+		li(class='peoplink', id=p.id)
+			a(href='person/' + p.id)
+				= p.name

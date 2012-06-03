@@ -20,7 +20,23 @@ a:hover {
    text-decoration: underline;
 }
 
+h1, h1, h3 {
+	margin:0;
+	padding:0;
+}
+h1 {
+	text-decoration: underline;
+}
+h3{
+	color:green;
+}
+ul {
+-webkit-padding-start: 11px;
+	
+}
 li {
+	margin:0;
+	padding:0;
    list-style-type: none;
 }
 
@@ -34,6 +50,56 @@ li {
    width: 500px;
 }
 
+.homelink{
+	float:right;
+}
+
 #auth {
    width: 275px;
+}
+
+.person {
+	width: 66%;
+	float:left;
+}
+.pic {
+	display:inline;
+	float:left;
+	width:220px;
+}
+
+.dropdown {
+	margin-bottom:1em;
+}
+
+ul.people {
+	padding-top:1em;
+}
+
+.person > .information {
+	float: left;
+	margin-left:20px;
+	width: 350px;
+}
+
+.thumb {
+	width:100%;
+}
+
+.entry{
+	padding:1ex;
+	width:100%;
+	min-height:30px;
+}
+
+.entry:focus {
+	outline: 1px dotted grey;
+	
+}
+
+.sidebar {
+	margin-top:1em;
+	width:300px;
+	height:100%;
+	float:right;
 }
